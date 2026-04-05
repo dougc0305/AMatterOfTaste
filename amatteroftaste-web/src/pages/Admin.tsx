@@ -298,7 +298,7 @@ ${notes}`,
 
   const updateIngredient = (idx: number, field: keyof IngredientRow, value: string) => {
     const updated = [...ingredients];
-    (updated[idx] as Record<string, unknown>)[field] = value;
+    updated[idx] = { ...updated[idx], [field]: value };
     setIngredients(updated);
   };
 
