@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF7F2;
+  --color-warm-white: #FEFCF9;
+  --color-sage: #8B9E8B;
+  --color-sage-dark: #6B7F6B;
+  --color-dusty-blue: #9EADB8;
+  --color-terracotta: #C4835A;
+  --color-terracotta-light: #D4A574;
+  --color-honey: #D4A96A;
+  --color-butter: #E8D5A3;
+  --color-parchment: #E8DFD0;
+  --color-stone: #C9BDA8;
+  --color-linen: #F0EBE3;
+  --color-wood: #6B5840;
+  --color-wood-dark: #3A2E1E;
+  --color-text: #2E2720;
+  --color-text-light: #4A4038;
+  --color-text-faint: #6B6058;
+}
+
+body {
+  margin: 0;
+  font-family: 'EB Garamond', Georgia, serif;
+  background-color: #FAF7F2;
+  color: #4A4038;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: #8B9E8B;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #C4835A;
+}
+
+::selection {
+  background-color: #E8D5A3;
+  color: #4A4038;
+}
+
+/* Subtle decorative divider */
+.divider-floral {
+  text-align: center;
+  margin: 2rem 0;
+  color: #C9BDA8;
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+}
+
+/* Soft card style — no hard borders */
+.recipe-card {
+  background: #FEFCF9;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(139, 115, 85, 0.08);
+  transition: all 0.3s ease;
+}
+
+.recipe-card:hover {
+  box-shadow: 0 6px 24px rgba(139, 115, 85, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Warm input styling */
+input, select, textarea {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #8B9E8B !important;
+  box-shadow: 0 0 0 3px rgba(139, 158, 139, 0.15);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F0EBE3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9BDA8;
+  border-radius: 4px;
+}
