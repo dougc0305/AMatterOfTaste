@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
+import { usePageView } from './hooks/usePageView';
 import Nav from './components/layout/Nav';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
@@ -11,11 +12,17 @@ import MyCookbook from './pages/MyCookbook';
 import Admin from './pages/Admin';
 import Account from './pages/Account';
 
+function RouteTracker() {
+  usePageView();
+  return null;
+}
+
 function App() {
   const { user, isLoggedIn, isAdmin, saveAuth, logout } = useAuth();
 
   return (
     <BrowserRouter>
+      <RouteTracker />
       <div className="min-h-screen bg-cream flex flex-col">
         <Nav user={user} onLogout={logout} />
         <main className="flex-1">

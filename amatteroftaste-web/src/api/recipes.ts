@@ -9,6 +9,7 @@ export interface RecipeListItem {
   categoryId: number;
   categoryName: string;
   primaryPhotoFilename: string | null;
+  viewCount: number;
 }
 
 export interface RecipePagedResult {

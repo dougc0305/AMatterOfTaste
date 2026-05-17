@@ -88,6 +88,10 @@ export default function RecipeDetail({ isLoggedIn }: RecipeDetailProps) {
                 <span className="text-wood">{recipe.cookTimeMinutes} min</span>
               </div>
             )}
+            <div>
+              <span className="text-xs tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif" }}>Viewed </span>
+              <span className="text-wood">{recipe.viewCount.toLocaleString()} {recipe.viewCount === 1 ? 'time' : 'times'}</span>
+            </div>
           </div>
 
           {/* Actions */}

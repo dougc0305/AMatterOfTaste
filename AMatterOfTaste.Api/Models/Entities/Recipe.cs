@@ -12,6 +12,7 @@ public class Recipe : IntIdentityBase
     public int? Servings { get; set; }
     public int? PrepTimeMinutes { get; set; }
     public int? CookTimeMinutes { get; set; }
+    public int ViewCount { get; set; }
 
     public RecipeCategory Category { get; set; } = null!;
     public ICollection<RecipeIngredient> Ingredients { get; set; } = [];

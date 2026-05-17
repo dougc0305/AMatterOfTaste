@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { getCategories, createRecipe, updateRecipe, getRecipes, deleteRecipe } from '../api/recipes';
 import type { RecipeListItem } from '../api/recipes';
 import type { Category } from '../types';
+import { getVisitDays } from '../api/visits';
+import type { VisitDay } from '../api/visits';
 import AiParser from '../components/admin/AiParser';
 
 interface IngredientRow {
@@ -21,6 +23,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
+  const [visitDays, setVisitDays] = useState<VisitDay[]>([]);
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') ?? '');
 
   // Editor state
@@ -45,6 +48,7 @@ export default function Admin() {
   useEffect(() => {
     getCategories().then(setCategories);
     loadRecipes();
+    getVisitDays(90).then(setVisitDays).catch(() => { /* admin-only, ignore failure */ });
   }, []);
 
   const loadRecipes = () => {
@@ -315,8 +319,38 @@ ${notes}`,
     setSteps(steps.filter((_, i) => i !== idx).map((s, i) => ({ ...s, stepNumber: i + 1 })));
 
   if (!showEditor) {
+    const visitTotal = visitDays.reduce((sum, d) => sum + d.count, 0);
+    const visitToday = visitDays.length > 0 ? visitDays[visitDays.length - 1].count : 0;
+    const visitMax = visitDays.reduce((m, d) => Math.max(m, d.count), 0);
+
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Visits panel */}
+        {visitDays.length > 0 && (
+          <div className="mb-10 p-6 rounded-xl bg-linen/40 border border-parchment/50">
+            <div className="flex justify-between items-baseline mb-4">
+              <h2 className="text-xl text-wood-dark" style={{ fontFamily: "'Cinzel', serif" }}>
+                Site Visits — Last 90 Days
+              </h2>
+              <div className="flex gap-6 text-sm text-text-light">
+                <span><span className="text-wood-dark font-semibold">{visitTotal.toLocaleString()}</span> total</span>
+                <span><span className="text-wood-dark font-semibold">{visitToday.toLocaleString()}</span> today</span>
+                <span><span className="text-wood-dark font-semibold">{visitMax.toLocaleString()}</span> peak</span>
+              </div>
+            </div>
+            <div className="flex items-end gap-px h-24">
+              {visitDays.map((d) => (
+                <div
+                  key={d.date}
+                  className="flex-1 bg-china-blue/30 hover:bg-china-blue transition-colors min-h-px"
+                  style={{ height: visitMax > 0 ? `${Math.max((d.count / visitMax) * 100, d.count > 0 ? 4 : 0)}%` : '0%' }}
+                  title={`${d.date}: ${d.count} ${d.count === 1 ? 'visit' : 'visits'}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl text-wood-dark">Admin — Recipes</h1>
           <button
@@ -333,6 +367,7 @@ ${notes}`,
             <tr className="border-b-2 border-parchment text-left">
               <th className="py-2 text-wood-dark" style={{ fontFamily: "'Cinzel', serif" }}>Title</th>
               <th className="py-2 text-wood-dark" style={{ fontFamily: "'Cinzel', serif" }}>Category</th>
+              <th className="py-2 text-wood-dark text-right" style={{ fontFamily: "'Cinzel', serif" }}>Views</th>
               <th className="py-2 text-wood-dark text-right" style={{ fontFamily: "'Cinzel', serif" }}>Actions</th>
             </tr>
           </thead>
@@ -341,6 +376,7 @@ ${notes}`,
               <tr key={r.id} className="border-b border-parchment/50 hover:bg-parchment/10">
                 <td className="py-3">{r.title}</td>
                 <td className="py-3 text-gray-800">{r.categoryName}</td>
+                <td className="py-3 text-right text-gray-800 tabular-nums">{r.viewCount.toLocaleString()}</td>
                 <td className="py-3 text-right space-x-3">
                   <button onClick={() => navigate(`/recipe/${r.id}`)} className="text-wood-dark hover:text-terracotta bg-transparent border-none cursor-pointer text-sm">View</button>
                   <button onClick={() => handleEdit(r.id)} className="text-wood-dark hover:text-terracotta bg-transparent border-none cursor-pointer text-sm">Edit</button>
@@ -350,7 +386,7 @@ ${notes}`,
             ))}
             {recipes.length === 0 && (
               <tr>
-                <td colSpan={3} className="text-center py-8 text-gray-600">No recipes yet. Add your first one!</td>
+                <td colSpan={4} className="text-center py-8 text-gray-600">No recipes yet. Add your first one!</td>
               </tr>
             )}
           </tbody>

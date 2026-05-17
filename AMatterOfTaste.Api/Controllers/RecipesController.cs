@@ -53,7 +53,8 @@ public class RecipesController : ControllerBase
                 PrimaryPhotoFilename = r.Photos
                     .Where(p => p.IsActive && p.IsPrimary)
                     .Select(p => p.Filename)
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                ViewCount = r.ViewCount
             })
             .ToListAsync();
 
@@ -79,6 +80,9 @@ public class RecipesController : ControllerBase
         if (recipe == null)
             return NotFound();
 
+        await _db.Database.ExecuteSqlInterpolatedAsync(
+            $"UPDATE recipe SET viewcount = viewcount + 1 WHERE id = {id}");
+
         return Ok(new RecipeDetailDto
         {
             Id = recipe.Id,
@@ -93,6 +97,7 @@ public class RecipesController : ControllerBase
             Servings = recipe.Servings,
             PrepTimeMinutes = recipe.PrepTimeMinutes,
             CookTimeMinutes = recipe.CookTimeMinutes,
+            ViewCount = recipe.ViewCount + 1,
             Ingredients = recipe.Ingredients.Select(i => new IngredientDto
             {
                 Id = i.Id,

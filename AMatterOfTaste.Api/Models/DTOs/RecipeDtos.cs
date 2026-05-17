@@ -9,6 +9,7 @@ public class RecipeListDto
     public int CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public string? PrimaryPhotoFilename { get; set; }
+    public int ViewCount { get; set; }
 }
 
 public class RecipeDetailDto
@@ -25,6 +26,7 @@ public class RecipeDetailDto
     public int? Servings { get; set; }
     public int? PrepTimeMinutes { get; set; }
     public int? CookTimeMinutes { get; set; }
+    public int ViewCount { get; set; }
     public List<IngredientDto> Ingredients { get; set; } = [];
     public List<StepDto> Steps { get; set; } = [];
     public List<PhotoDto> Photos { get; set; } = [];

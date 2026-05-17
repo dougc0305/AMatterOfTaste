@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<RecipePhoto> RecipePhotos => Set<RecipePhoto>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<UserFavorite> UserFavorites => Set<UserFavorite>();
+    public DbSet<SiteVisit> SiteVisits => Set<SiteVisit>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,6 +77,12 @@ public class AppDbContext : DbContext
             e.HasOne(x => x.User).WithMany(u => u.Favorites).HasForeignKey(x => x.UserId);
             e.HasOne(x => x.Recipe).WithMany(r => r.Favorites).HasForeignKey(x => x.RecipeId);
             e.HasIndex(x => new { x.UserId, x.RecipeId }).IsUnique();
+        });
+
+        modelBuilder.Entity<SiteVisit>(e =>
+        {
+            e.ToTable("sitevisit");
+            e.HasIndex(x => x.VisitDate).IsUnique();
         });
 
         // Map all column names to lowercase via snake_case convention

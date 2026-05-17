@@ -41,6 +41,7 @@ export interface Recipe {
   servings: number | null;
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
+  viewCount: number;
   ingredients: Ingredient[];
   steps: Step[];
   photos: RecipePhoto[];
