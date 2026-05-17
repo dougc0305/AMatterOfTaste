@@ -11,7 +11,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    let body: { message?: string } | null = null;
+    try { body = await response.json(); } catch { /* non-JSON body */ }
+    const err = new Error(body?.message ?? `API error: ${response.status}`) as Error & {
+      status: number;
+      body: { message?: string } | null;
+    };
+    err.status = response.status;
+    err.body = body;
+    throw err;
   }
 
   if (response.status === 204) return undefined as T;

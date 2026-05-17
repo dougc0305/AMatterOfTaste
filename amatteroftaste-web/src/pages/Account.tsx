@@ -18,8 +18,11 @@ export default function Account() {
       setSuccess('Password changed');
       setCurrentPassword('');
       setNewPassword('');
-    } catch {
-      setError('Current password is incorrect');
+    } catch (e) {
+      const err = e as Error & { status?: number };
+      if (err.status === 400) setError('Current password is incorrect');
+      else if (err.status === 401) setError('Your session expired — please sign in again');
+      else setError(err.message || 'Something went wrong');
     } finally {
       setSubmitting(false);
     }
