@@ -30,13 +30,18 @@ export default function Nav({ user, onLogout }: NavProps) {
             </Link>
           )}
           {user ? (
-            <button
-              onClick={onLogout}
-              className="text-text-light hover:text-terracotta bg-transparent border-none cursor-pointer tracking-widest uppercase"
-              style={{ fontFamily: "'Cinzel', serif", fontSize: '0.75rem' }}
-            >
-              Logout
-            </button>
+            <>
+              <Link to="/account" className="text-text-light hover:text-terracotta no-underline transition-colors">
+                Account
+              </Link>
+              <button
+                onClick={onLogout}
+                className="text-text-light hover:text-terracotta bg-transparent border-none cursor-pointer tracking-widest uppercase"
+                style={{ fontFamily: "'Cinzel', serif", fontSize: '0.75rem' }}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <Link to="/login" className="text-text-light hover:text-terracotta no-underline transition-colors">
               Sign In

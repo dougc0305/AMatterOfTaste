@@ -63,6 +63,22 @@ public class AuthService
         };
     }
 
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto dto)
+    {
+        var user = await _db.AppUsers
+            .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
+
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+            return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.ModifiedById = userId;
+        user.ModifiedDate = DateTime.Now;
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     private string GenerateToken(AppUser user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));

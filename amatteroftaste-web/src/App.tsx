@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MyCookbook from './pages/MyCookbook';
 import Admin from './pages/Admin';
+import Account from './pages/Account';
 
 function App() {
   const { user, isLoggedIn, isAdmin, saveAuth, logout } = useAuth();
@@ -27,6 +28,10 @@ function App() {
             <Route
               path="/my-cookbook"
               element={isLoggedIn ? <MyCookbook /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/account"
+              element={isLoggedIn ? <Account /> : <Navigate to="/login" />}
             />
             <Route
               path="/admin"

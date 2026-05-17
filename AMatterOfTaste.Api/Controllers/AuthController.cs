@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using AMatterOfTaste.Api.Models.DTOs;
 using AMatterOfTaste.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AMatterOfTaste.Api.Controllers;
@@ -33,5 +35,17 @@ public class AuthController : ControllerBase
             return Conflict(new { message = "Email already registered" });
 
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ok = await _authService.ChangePasswordAsync(userId, dto);
+        if (!ok)
+            return BadRequest(new { message = "Current password is incorrect" });
+
+        return Ok(new { message = "Password changed" });
     }
 }
