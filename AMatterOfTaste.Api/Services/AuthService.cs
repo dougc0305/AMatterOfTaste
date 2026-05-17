@@ -73,7 +73,7 @@ public class AuthService
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         user.ModifiedById = userId;
-        user.ModifiedDate = DateTime.Now;
+        user.ModifiedDate = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
         return true;
