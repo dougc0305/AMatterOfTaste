@@ -26,8 +26,8 @@ export function getRecipes(page = 1, pageSize = 20, categoryId?: number, search?
   return api.get<RecipePagedResult>(`/recipes?${params}`);
 }
 
-export function getRecipe(id: number) {
-  return api.get<Recipe>(`/recipes/${id}`);
+export function getRecipe(id: number, noCount = false) {
+  return api.get<Recipe>(`/recipes/${id}${noCount ? '?noCount=true' : ''}`);
 }
 
 export function getCategories() {

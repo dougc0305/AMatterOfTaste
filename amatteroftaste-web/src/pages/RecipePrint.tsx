@@ -8,7 +8,7 @@ export default function RecipePrint() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    if (id) getRecipe(Number(id)).then(setRecipe);
+    if (id) getRecipe(Number(id), true).then(setRecipe);
   }, [id]);
 
   if (!recipe) {

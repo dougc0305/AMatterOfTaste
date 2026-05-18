@@ -68,7 +68,7 @@ public class RecipesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id, [FromQuery] bool noCount = false)
     {
         var recipe = await _db.Recipes
             .Include(r => r.Category)
@@ -80,8 +80,11 @@ public class RecipesController : ControllerBase
         if (recipe == null)
             return NotFound();
 
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"UPDATE recipe SET viewcount = viewcount + 1 WHERE id = {id}");
+        if (!noCount)
+        {
+            await _db.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE recipe SET viewcount = viewcount + 1 WHERE id = {id}");
+        }
 
         return Ok(new RecipeDetailDto
         {
@@ -97,7 +100,7 @@ public class RecipesController : ControllerBase
             Servings = recipe.Servings,
             PrepTimeMinutes = recipe.PrepTimeMinutes,
             CookTimeMinutes = recipe.CookTimeMinutes,
-            ViewCount = recipe.ViewCount + 1,
+            ViewCount = noCount ? recipe.ViewCount : recipe.ViewCount + 1,
             Ingredients = recipe.Ingredients.Select(i => new IngredientDto
             {
                 Id = i.Id,
