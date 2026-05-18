@@ -117,6 +117,15 @@ export default function RecipeDetail({ isLoggedIn }: RecipeDetailProps) {
                 Pin It
               </a>
             )}
+            <Link
+              to={`/recipe/${recipe.id}/print`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2 rounded-full no-underline transition-all text-xs tracking-widest uppercase"
+              style={{ fontFamily: "'Cinzel', serif", border: '1px solid rgba(122, 91, 56, 0.5)', color: '#7A5B38' }}
+            >
+              Print
+            </Link>
           </div>
         </div>
       </div>
