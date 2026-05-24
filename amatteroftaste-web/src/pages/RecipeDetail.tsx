@@ -42,16 +42,12 @@ export default function RecipeDetail({ isLoggedIn }: RecipeDetailProps) {
 
       {/* Header with photo left, title right */}
       <div className="flex flex-col md:flex-row gap-8 mt-8 mb-10 items-start">
-        {/* Photo with blurred edges */}
+        {/* Photo */}
         <div className="md:w-72 flex-shrink-0">
           <img
             src={recipe.photos.length > 0 ? `/photos/${recipe.photos[0].filename}` : '/default-recipe.png'}
             alt={recipe.title}
-            className="w-full h-64 object-cover"
-            style={{
-              maskImage: 'radial-gradient(ellipse 80% 75% at center, black 30%, transparent 95%)',
-              WebkitMaskImage: 'radial-gradient(ellipse 80% 75% at center, black 30%, transparent 95%)',
-            }}
+            className="w-full h-64 object-cover rounded-lg"
           />
         </div>
 
