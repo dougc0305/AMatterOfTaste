@@ -1,5 +1,6 @@
 using AMatterOfTaste.Api.Data;
 using AMatterOfTaste.Api.Models.DTOs;
+using AMatterOfTaste.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,15 +12,21 @@ namespace AMatterOfTaste.Api.Controllers;
 public class VisitsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IConfiguration _config;
 
-    public VisitsController(AppDbContext db)
+    public VisitsController(AppDbContext db, IConfiguration config)
     {
         _db = db;
+        _config = config;
     }
 
     [HttpPost("ping")]
     public async Task<IActionResult> Ping()
     {
+        // Don't count the owner's own visits (logged-in admin or ignored IP).
+        if (CountFilter.IsExcluded(HttpContext, _config))
+            return NoContent();
+
         var today = DateOnly.FromDateTime(DateTime.Now);
 
         await _db.Database.ExecuteSqlInterpolatedAsync($@"

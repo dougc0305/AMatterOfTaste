@@ -1,6 +1,7 @@
 using AMatterOfTaste.Api.Data;
 using AMatterOfTaste.Api.Models.DTOs;
 using AMatterOfTaste.Api.Models.Entities;
+using AMatterOfTaste.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,12 @@ namespace AMatterOfTaste.Api.Controllers;
 public class RecipesController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IConfiguration _config;
 
-    public RecipesController(AppDbContext db)
+    public RecipesController(AppDbContext db, IConfiguration config)
     {
         _db = db;
+        _config = config;
     }
 
     [HttpGet]
@@ -80,7 +83,8 @@ public class RecipesController : ControllerBase
         if (recipe == null)
             return NotFound();
 
-        if (!noCount)
+        var shouldCount = !noCount && !CountFilter.IsExcluded(HttpContext, _config);
+        if (shouldCount)
         {
             await _db.Database.ExecuteSqlInterpolatedAsync(
                 $"UPDATE recipe SET viewcount = viewcount + 1 WHERE id = {id}");
@@ -100,7 +104,7 @@ public class RecipesController : ControllerBase
             Servings = recipe.Servings,
             PrepTimeMinutes = recipe.PrepTimeMinutes,
             CookTimeMinutes = recipe.CookTimeMinutes,
-            ViewCount = noCount ? recipe.ViewCount : recipe.ViewCount + 1,
+            ViewCount = shouldCount ? recipe.ViewCount + 1 : recipe.ViewCount,
             Ingredients = recipe.Ingredients.Select(i => new IngredientDto
             {
                 Id = i.Id,
