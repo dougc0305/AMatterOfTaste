@@ -19,6 +19,9 @@ set "IIS_SITE_NAME=AMatterOfTaste"
 set "DEPLOY_ROOT=C:\inetpub\wwwroot\AMatterOfTaste"
 set "BACKUP_ROOT=C:\Deployments\AMatterOfTaste\Backups"
 set "ARTIFACT_ROOT=C:\Deployments\AMatterOfTaste\Artifacts"
+REM Persistent recipe photo storage — lives OUTSIDE DEPLOY_ROOT so deploys never wipe uploads.
+REM Must match PhotoStorage:Path in appsettings.json.
+set "PHOTO_DATA_DIR=F:\AMatterOfTasteData\photos"
 
 REM =====================================================
 REM Parse arguments
@@ -131,6 +134,31 @@ if not exist "%EXTRACT_DIR%\server" (
 if not exist "%EXTRACT_DIR%\client" (
   echo ERROR: Extracted archive missing 'client' folder.
   exit /b 1
+)
+
+REM =====================================================
+REM Prepare persistent photo storage
+REM   - ensure the folder exists
+REM   - grant the IIS app pool identity write access (fixes
+REM     blank-500 upload failures from UnauthorizedAccessException)
+REM   - one-time migrate any photos still in the old wwwroot
+REM     location before the backup /MOVE below wipes them
+REM   This block is idempotent and safe to run every deploy.
+REM =====================================================
+echo.
+echo === Preparing persistent photo storage ===
+echo Photo data dir: %PHOTO_DATA_DIR%
+if not exist "%PHOTO_DATA_DIR%" mkdir "%PHOTO_DATA_DIR%"
+
+icacls "%PHOTO_DATA_DIR%" /grant "IIS AppPool\%IIS_SITE_NAME%:(OI)(CI)M" /T >nul
+if errorlevel 1 (
+  echo WARNING: Could not grant write permissions on "%PHOTO_DATA_DIR%".
+  echo          Uploads will fail until "IIS AppPool\%IIS_SITE_NAME%" has Modify rights there.
+)
+
+if exist "%DEPLOY_ROOT%\wwwroot\photos" (
+  echo Migrating existing photos from wwwroot\photos ...
+  robocopy "%DEPLOY_ROOT%\wwwroot\photos" "%PHOTO_DATA_DIR%" /E /XO /NFL /NDL /NJH /NJS /NC /NS >nul
 )
 
 REM =====================================================

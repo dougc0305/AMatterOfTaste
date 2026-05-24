@@ -1,5 +1,6 @@
 using AMatterOfTaste.Api.Data;
 using AMatterOfTaste.Api.Models.Entities;
+using AMatterOfTaste.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,13 @@ public class PhotosController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment _env;
+    private readonly IConfiguration _config;
 
-    public PhotosController(AppDbContext db, IWebHostEnvironment env)
+    public PhotosController(AppDbContext db, IWebHostEnvironment env, IConfiguration config)
     {
         _db = db;
         _env = env;
+        _config = config;
     }
 
     [HttpPost("upload/{recipeId}")]
@@ -30,8 +33,7 @@ public class PhotosController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest(new { message = "No file provided" });
 
-        var photosDir = Path.Combine(_env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot"), "photos");
-        Directory.CreateDirectory(photosDir);
+        var photosDir = PhotoStorage.GetDirectory(_config, _env);
 
         var ext = Path.GetExtension(file.FileName).ToLower();
         var filename = $"{Guid.NewGuid()}{ext}";
