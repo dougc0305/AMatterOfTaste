@@ -20,8 +20,14 @@ export default function AiParser({ onParsed }: AiParserProps) {
       const parsed = await parseRecipe(rawText);
       onParsed(parsed, rawText);
       setRawText('');
-    } catch {
-      setError('Failed to parse recipe. You can enter the details manually.');
+    } catch (e) {
+      const err = e as { sessionExpired?: boolean; message?: string };
+      // Keep the pasted text on screen so a re-login doesn't lose their work.
+      setError(
+        err.sessionExpired
+          ? 'Your session has expired. Log in again, then parse — your text is still here.'
+          : 'Failed to parse recipe. You can enter the details manually.'
+      );
     } finally {
       setLoading(false);
     }

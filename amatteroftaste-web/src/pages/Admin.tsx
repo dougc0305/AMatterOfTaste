@@ -187,8 +187,13 @@ export default function Admin() {
       // Save current notes as original text, then clear notes
       setOriginalText(notes);
       setNotes('');
-    } catch {
-      alert('Failed to parse notes. You can break them out manually.');
+    } catch (e) {
+      const err = e as { sessionExpired?: boolean };
+      alert(
+        err.sessionExpired
+          ? 'Your session has expired. Log in again, then try parsing the notes.'
+          : 'Failed to parse notes. You can break them out manually.'
+      );
     } finally {
       setParsingNotes(false);
     }

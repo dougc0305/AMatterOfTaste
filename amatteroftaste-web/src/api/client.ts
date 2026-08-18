@@ -13,12 +13,27 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!response.ok) {
     let body: { message?: string } | null = null;
     try { body = await response.json(); } catch { /* non-JSON body */ }
-    const err = new Error(body?.message ?? `API error: ${response.status}`) as Error & {
+
+    // A 401 on a protected endpoint almost always means the JWT expired (they
+    // last 7 days). The server sends a bare 401 with no body, so without this
+    // callers report their own generic failure ("couldn't parse the recipe"),
+    // which points at the wrong problem. /auth/ is excluded because
+    // /auth/login returns 401 for bad credentials and its own message
+    // ("Invalid email or password") is the correct one to show.
+    const sessionExpired = response.status === 401 && !path.startsWith('/auth/');
+
+    const err = new Error(
+      sessionExpired
+        ? 'Your session has expired. Please log in again.'
+        : body?.message ?? `API error: ${response.status}`
+    ) as Error & {
       status: number;
       body: { message?: string } | null;
+      sessionExpired: boolean;
     };
     err.status = response.status;
     err.body = body;
+    err.sessionExpired = sessionExpired;
     throw err;
   }
 
