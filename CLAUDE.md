@@ -42,7 +42,7 @@ Built by the same developer as the CharbTech Business System — follow all the 
 - F: drive for backups
 
 ### External APIs
-- Anthropic API (Claude) — recipe paste-and-parse feature, called from React frontend
+- Anthropic API (Claude) — recipe paste-and-parse feature, proxied through the .NET API (`/api/ai/*`)
 - Pinterest — Save to Pinterest via URL scheme (no API key required)
 
 ---
@@ -253,9 +253,11 @@ return File(pdf.BinaryData, "application/pdf", "MyCookbook.pdf");
 
 ## AI Recipe Parser
 
-- Called **from the React frontend** directly to the Anthropic API
-- Model: `claude-sonnet-4-20250514`
-- User pastes raw recipe text → Claude parses → structured JSON returned → pre-fills editor form
+- Called **server-side** via `POST /api/ai/parse-recipe` and `POST /api/ai/parse-notes` (admin-only)
+- `AiParseService` uses the official Anthropic C# SDK (`Anthropic` NuGet package)
+- API key comes from config `Anthropic:ApiKey` — set on the server as the `Anthropic__ApiKey` machine environment variable (never in git, never in the browser); IIS must be restarted (`iisreset`) after changing it
+- Model: `claude-sonnet-5`
+- User pastes raw recipe text → API proxies to Claude → structured JSON returned → pre-fills editor form
 - Expected JSON response shape:
 
 ```json

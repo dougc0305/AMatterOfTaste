@@ -5,6 +5,8 @@ import type { RecipeListItem } from '../api/recipes';
 import type { Category } from '../types';
 import { getVisitDays } from '../api/visits';
 import type { VisitDay } from '../api/visits';
+import { parseNotes } from '../api/ai';
+import type { ParsedRecipe } from '../api/ai';
 import AiParser from '../components/admin/AiParser';
 
 interface IngredientRow {
@@ -24,7 +26,6 @@ export default function Admin() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
   const [visitDays, setVisitDays] = useState<VisitDay[]>([]);
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') ?? '');
 
   // Editor state
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -137,15 +138,7 @@ export default function Admin() {
     loadRecipes();
   };
 
-  const handleAiParsed = (parsed: {
-    title: string;
-    description: string;
-    servings: number | null;
-    preptimeminutes: number | null;
-    cooktimeminutes: number | null;
-    ingredients: { quantity: string; unit: string; name: string }[];
-    steps: { stepnumber: number; instruction: string }[];
-  }, rawText: string) => {
+  const handleAiParsed = (parsed: ParsedRecipe, rawText: string) => {
     setOriginalText(rawText);
     setTitle(parsed.title ?? '');
     setDescription(parsed.description ?? '');
@@ -168,56 +161,14 @@ export default function Admin() {
     );
   };
 
-  const handleApiKeyChange = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('anthropic_api_key', key);
-  };
-
   const handleParseNotes = async () => {
     if (!notes.trim()) return;
-    if (!apiKey) {
-      alert('Enter your Anthropic API key at the top of the page first.');
-      return;
-    }
     setParsingNotes(true);
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2048,
-          messages: [
-            {
-              role: 'user',
-              content: `Parse the following recipe notes into structured ingredients and steps. The notes contain both ingredients and instructions mixed together. Separate them out. Return ONLY valid JSON, no markdown, no preamble. Use this exact shape:
-{
-  "ingredients": [{ "quantity": "string or empty", "unit": "string or empty", "name": "string" }],
-  "steps": [{ "stepnumber": 1, "instruction": "string" }]
-}
-
-Recipe title: ${title}
-
-Notes:
-${notes}`,
-            },
-          ],
-        }),
-      });
-
-      const data = await response.json();
-      const text = data.content?.[0]?.text;
-      if (!text) throw new Error('No response');
-
-      const parsed = JSON.parse(text);
+      const parsed = await parseNotes(title, notes);
       if (parsed.ingredients?.length) {
         setIngredients(
-          parsed.ingredients.map((i: { quantity: string; unit: string; name: string }, idx: number) => ({
+          parsed.ingredients.map((i, idx) => ({
             sortOrder: idx,
             quantity: i.quantity ?? '',
             unit: i.unit ?? '',
@@ -227,7 +178,7 @@ ${notes}`,
       }
       if (parsed.steps?.length) {
         setSteps(
-          parsed.steps.map((s: { stepnumber: number; instruction: string }) => ({
+          parsed.steps.map((s) => ({
             stepNumber: s.stepnumber,
             instruction: s.instruction,
           }))
@@ -409,20 +360,8 @@ ${notes}`,
         </button>
       </div>
 
-      {/* API Key */}
-      <div className="mb-4">
-        <label className="block text-xs text-gray-700 mb-1">Anthropic API Key (stored locally)</label>
-        <input
-          type="password"
-          value={apiKey}
-          onChange={(e) => handleApiKeyChange(e.target.value)}
-          placeholder="sk-ant-..."
-          className="w-full border border-parchment rounded px-3 py-1 text-sm focus:outline-none focus:border-china-blue"
-        />
-      </div>
-
       {/* AI Parser */}
-      <AiParser onParsed={handleAiParsed} apiKey={apiKey} />
+      <AiParser onParsed={handleAiParsed} />
 
       {/* Recipe Form */}
       <div className="space-y-4">
