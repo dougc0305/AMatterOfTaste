@@ -12,7 +12,11 @@ Built by the same developer as the CharbTech Business System — follow all the 
 
 - Single Azure VM, IIS-hosted
 - Single PostgreSQL database (no multi-tenant requirement)
-- Domain: amatteroftaste.us
+- Domain: **www.amatteroftaste.us** is canonical. The apex (`amatteroftaste.us`) is bound in IIS
+  and permanently redirects to `www` via the rewrite rule in `AMatterOfTaste.Api/web.config`.
+  The Let's Encrypt cert (win-acme, renewal "[IIS] AMatterOfTaste, (any host)") covers both
+  names automatically — it derives them from the site's bindings, so no cert config is needed
+  when bindings change.
 - Same Azure subscription and resource group patterns as CharbTech
 
 ---
